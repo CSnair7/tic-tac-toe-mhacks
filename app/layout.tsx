@@ -1,16 +1,15 @@
 import type { Metadata } from "next";
 import {
-  Instrument_Serif,
+  Instrument_Sans,
   Red_Hat_Display,
   Red_Hat_Mono,
 } from "next/font/google";
 import "./globals.css";
 
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument-serif",
+const instrumentSans = Instrument_Sans({
+  variable: "--font-instrument-sans",
   subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
+  weight: ["500", "600", "700"],
 });
 
 const redHatDisplay = Red_Hat_Display({
@@ -34,7 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${instrumentSerif.variable} ${redHatDisplay.variable} ${redHatMono.variable} h-full antialiased`}
+      className={`${instrumentSans.variable} ${redHatDisplay.variable} ${redHatMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

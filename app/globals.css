@@ -2,7 +2,7 @@
 
 @theme {
   --font-sans: var(--font-red-hat-display), ui-sans-serif, sans-serif;
-  --font-display: var(--font-instrument-serif), serif;
+  --font-display: var(--font-instrument-sans), ui-sans-serif, sans-serif;
   --font-mono: var(--font-red-hat-mono), ui-monospace, monospace;
 
   --color-moss-900: #1d2412;
@@ -16,7 +16,7 @@
   --color-leaf: #c9e07a;
   --color-bloom: #e07a9a;
 
-  --radius-card: 1.5rem;
+  --radius-card: 0.75rem;
   --shadow-card:
     0 20px 45px -20px rgba(29, 36, 18, 0.35), 0 2px 6px rgba(29, 36, 18, 0.08);
 }
