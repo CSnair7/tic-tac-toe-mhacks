@@ -177,7 +177,7 @@ git commit -m "chore: remove Vitest test tooling per project decision"
 
 ---
 
-### Task 3: Local score store
+### Task 3: Local score store — DONE
 
 **Files:**
 - Create: `lib/scoreStore.ts`
@@ -192,9 +192,9 @@ git commit -m "chore: remove Vitest test tooling per project decision"
   - `getScoreStore(): Promise<ScoreStore>` (Task 3 version always resolves to `localScoreStore`; Task 4 adds branching)
   - `localScoreStore: ScoreStore`
 
-No automated test for this task — verified manually via a scratch script in Step 3 below, per project decision to drop automated testing.
+No automated test for this task, per project decision to drop automated testing — verified via typecheck/build (Step 3) and later exercised for real through the UI in Task 6.
 
-- [ ] **Step 1: Implement `lib/scoreStore.ts`**
+- [x] **Step 1: Implement `lib/scoreStore.ts`**
 
 ```ts
 export type GameResult = "win" | "loss" | "tie";
@@ -216,7 +216,7 @@ export async function getScoreStore(): Promise<ScoreStore> {
 }
 ```
 
-- [ ] **Step 2: Implement `lib/scoreStore.local.ts`**
+- [x] **Step 2: Implement `lib/scoreStore.local.ts`**
 
 ```ts
 import type { ScoreStore, ScoreStats, GameResult } from "./scoreStore";
@@ -252,7 +252,7 @@ export const localScoreStore: ScoreStore = {
 };
 ```
 
-- [ ] **Step 3: Verify the project typechecks and builds**
+- [x] **Step 3: Verify the project typechecks and builds**
 
 ```bash
 npx tsc --noEmit
@@ -261,7 +261,7 @@ npm run build
 
 Expected: both succeed with no errors. The localStorage-backed behavior itself gets exercised for real once the UI calls it in Task 6 (full manual browser playthrough).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add lib/scoreStore.ts lib/scoreStore.local.ts
