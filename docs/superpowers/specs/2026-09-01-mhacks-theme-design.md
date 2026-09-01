@@ -149,10 +149,8 @@ function getScoreStore(): ScoreStore {
 
 ## Testing plan
 
-- Unit tests (Vitest — lighter config than Jest for a Next.js/ESM
-  project) for `gameLogic.ts`: win detection (rows/cols/diagonals), draw
-  detection, invalid-move rejection.
-- Unit test for `localScoreStore`: record + read round-trip.
+- No automated test suite — this is a teaching repo and beginners should
+  not need to run/maintain a test runner to work on it.
 - Manual browser check (required before calling this done, per project
   norms): full game playthrough with zero env vars configured (confirms
   the zero-config path truly works), then again with Supabase env vars
