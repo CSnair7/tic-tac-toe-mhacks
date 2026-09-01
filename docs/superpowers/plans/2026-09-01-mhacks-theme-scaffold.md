@@ -433,27 +433,29 @@ git commit -m "feat: add opt-in Supabase score store, activated via env vars"
 
 ---
 
-### Task 5: Theme tokens, fonts, and logo asset
+### Task 5: Theme tokens, fonts, and logo asset — DONE
 
 **Files:**
 - Modify: `app/globals.css` (replace generated content with theme tokens)
 - Modify: `app/layout.tsx` (load fonts, update metadata)
-- Create: `public/mhacks-logo.svg` (copied from the dashboard repo)
+- Create: `public/mhacks-logo.png` (copied from the dashboard repo)
 
 **Interfaces:**
 - Consumes: nothing
 - Produces (used by Task 6):
   - Tailwind utility classes generated from the theme tokens: `bg-parchment`, `bg-cream`, `text-moss-900`, `text-moss-700`, `bg-moss-700`, `hover:bg-moss-800`, `bg-leaf`, `rounded-card`, `shadow-card`, `font-display` (Instrument Serif), default `font-sans`/`font-mono` now resolving to Red Hat Display/Red Hat Mono
-  - Logo available at the public path `/mhacks-logo.svg`
+  - Logo available at the public path `/mhacks-logo.png`
 
-- [ ] **Step 1: Copy the logo asset from the dashboard repo**
+- [x] **Step 1: Copy the logo asset from the dashboard repo**
+
+`mhacks25_logo.svg` (the file this plan originally named) turned out to be 4.3MB — an unusually large vector for a wordmark, and a poor fit for a beginner teaching repo's page-load and clone size. Used `mhacks_logo.png` (13KB) instead, per user decision:
 
 ```bash
-cp /Users/alexanderhu/projects/mhacks/dashboard/public/mhacks25_logo.svg \
-   /Users/alexanderhu/projects/mhacks/tic-tac-toe-game/public/mhacks-logo.svg
+cp /Users/alexanderhu/projects/mhacks/dashboard/public/mhacks_logo.png \
+   /Users/alexanderhu/projects/mhacks/tic-tac-toe-game/public/mhacks-logo.png
 ```
 
-- [ ] **Step 2: Replace `app/globals.css`**
+- [x] **Step 2: Replace `app/globals.css`**
 
 ```css
 @import "tailwindcss";
@@ -485,7 +487,9 @@ body {
 }
 ```
 
-- [ ] **Step 3: Replace `app/layout.tsx`**
+- [x] **Step 3: Replace `app/layout.tsx`**
+
+The `create-next-app` version used in Task 1 generated `layout.tsx` typed with Next's `LayoutProps<"/">` helper rather than the `Readonly<{ children: React.ReactNode }>` pattern this plan originally assumed, and included `h-full`/`min-h-full flex flex-col` classes. Followed the existing generated pattern instead of overwriting it:
 
 ```tsx
 import type { Metadata } from "next";
@@ -520,22 +524,19 @@ export const metadata: Metadata = {
   description: "A tic-tac-toe game themed after the MHacks Digital Garden.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en">
-      <body
-        className={`${instrumentSerif.variable} ${redHatDisplay.variable} ${redHatMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+    <html
+      lang="en"
+      className={`${instrumentSerif.variable} ${redHatDisplay.variable} ${redHatMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }
 ```
 
-- [ ] **Step 4: Verify the build succeeds**
+- [x] **Step 4: Verify the build succeeds**
 
 ```bash
 npm run build
@@ -543,10 +544,10 @@ npm run build
 
 Expected: succeeds with no errors (the default page from Task 1 still renders, now on the new fonts/background — full visual/UI verification happens in Task 6 once real content exists).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
-git add app/globals.css app/layout.tsx public/mhacks-logo.svg
+git add app/globals.css app/layout.tsx public/mhacks-logo.png
 git commit -m "feat: apply mhacks Digital Garden theme tokens and fonts"
 ```
 
@@ -565,7 +566,7 @@ git commit -m "feat: apply mhacks Digital Garden theme tokens and fonts"
 - Consumes:
   - From Task 2: `createEmptyBoard`, `applyMove`, `checkWinner`, `isDraw`, `isValidMove`, `type Board`, `type Player`, `type Cell` (all from `@/lib/gameLogic`)
   - From Task 3/4: `getScoreStore`, `type ScoreStats` (from `@/lib/scoreStore`)
-  - From Task 5: the Tailwind utility classes and `/mhacks-logo.svg`
+  - From Task 5: the Tailwind utility classes and `/mhacks-logo.png`
 - Produces: the playable game at `/`
 
 No automated tests for this task, per the spec's testing plan — verified manually in the browser.
@@ -579,7 +580,7 @@ export function Header() {
   return (
     <header className="flex flex-col items-center gap-4 pt-12 pb-8 text-center">
       <Image
-        src="/mhacks-logo.svg"
+        src="/mhacks-logo.png"
         alt="MHacks logo"
         width={220}
         height={34}
