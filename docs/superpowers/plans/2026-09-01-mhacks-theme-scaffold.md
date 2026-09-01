@@ -270,7 +270,7 @@ git commit -m "feat: add local score store backed by localStorage"
 
 ---
 
-### Task 4: Supabase score store + env var wiring
+### Task 4: Supabase score store + env var wiring — DONE
 
 **Files:**
 - Create: `lib/scoreStore.supabase.ts`
@@ -287,13 +287,13 @@ git commit -m "feat: add local score store backed by localStorage"
 
 No automated test for this task, per the spec's testing plan — the Supabase path is verified manually (Task 7). The testable deliverable is a clean typecheck/build.
 
-- [ ] **Step 1: Install the Supabase client**
+- [x] **Step 1: Install the Supabase client**
 
 ```bash
 npm install @supabase/supabase-js
 ```
 
-- [ ] **Step 2: Create `lib/scoreStore.supabase.ts`**
+- [x] **Step 2: Create `lib/scoreStore.supabase.ts`**
 
 ```ts
 import { createClient } from "@supabase/supabase-js";
@@ -360,7 +360,7 @@ export const supabaseScoreStore: ScoreStore = {
 };
 ```
 
-- [ ] **Step 3: Modify `lib/scoreStore.ts` to branch on configuration**
+- [x] **Step 3: Modify `lib/scoreStore.ts` to branch on configuration**
 
 Replace the `getScoreStore` function with:
 
@@ -384,7 +384,7 @@ export async function getScoreStore(): Promise<ScoreStore> {
 
 (Leave the `GameResult`, `ScoreStats`, and `ScoreStore` type/interface declarations above it unchanged.)
 
-- [ ] **Step 4: Create `.env.example`**
+- [x] **Step 4: Create `.env.example`**
 
 ```
 # Optional: add these to switch score persistence from browser localStorage
@@ -394,13 +394,13 @@ NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 ```
 
-- [ ] **Step 5: Add an explanatory comment to `.gitignore`**
+- [x] **Step 5: Add an explanatory comment to `.gitignore`, and un-ignore `.env.example`**
 
-Find the line(s) in the generated `.gitignore` that read:
+The generated `.gitignore` actually reads `.env*` (not `.env*.local` as an earlier draft of this plan assumed) — that pattern would also block committing `.env.example`. Find the line that reads:
 
 ```
 # env files (can opt-in for committing if needed)
-.env*.local
+.env*
 ```
 
 Replace with:
@@ -409,10 +409,13 @@ Replace with:
 # env files (can opt-in for committing if needed)
 # Never committed: these hold your real Supabase keys. Copy .env.example
 # to .env.local and fill in real values there instead.
-.env*.local
+.env*
+!.env.example
 ```
 
-- [ ] **Step 6: Verify the project still typechecks and builds**
+Verify with `git check-ignore -v .env.example` — it should print nothing (not ignored).
+
+- [x] **Step 6: Verify the project still typechecks and builds**
 
 ```bash
 npx tsc --noEmit
@@ -421,7 +424,7 @@ npm run build
 
 Expected: both succeed with no errors.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add lib/scoreStore.ts lib/scoreStore.supabase.ts .env.example .gitignore package.json package-lock.json
