@@ -22,6 +22,10 @@
 }
 
 body {
-  background-color: var(--color-parchment);
-  color: var(--color-moss-900);
+  background-color: var(--color-moss-700);
+  background-image:
+    linear-gradient(rgba(239, 233, 212, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(239, 233, 212, 0.055) 1px, transparent 1px);
+  background-size: 96px 96px;
+  color: var(--color-cream);
 }
