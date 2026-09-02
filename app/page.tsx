@@ -14,7 +14,6 @@ import {
   type Board as BoardValue,
   type Player,
 } from "@/lib/gameLogic";
-import { getScoreStore } from "@/lib/scoreStore";
 
 const HUMAN: Player = "X";
 const OPPONENT: Player = "O";
@@ -36,11 +35,6 @@ export default function Home() {
   const gameOver = winner !== null || draw;
   const computersTurn = mode === "vsComputer" && current === OPPONENT;
 
-  async function recordResult(result: "win" | "loss" | "tie") {
-    const store = await getScoreStore();
-    await store.recordResult(result);
-  }
-
   function handleCellClick(index: number) {
     if (gameOver || computersTurn || !isValidMove(board, index)) return;
 
@@ -48,14 +42,8 @@ export default function Home() {
     setBoard(nextBoard);
 
     const nextWinner = checkWinner(nextBoard);
-    if (nextWinner) {
-      recordResult(nextWinner === HUMAN ? "win" : "loss");
-      return;
-    }
-    if (isDraw(nextBoard)) {
-      recordResult("tie");
-      return;
-    }
+    if (nextWinner) return;
+    if (isDraw(nextBoard)) return;
     setCurrent(current === HUMAN ? OPPONENT : HUMAN);
   }
 
@@ -78,14 +66,8 @@ export default function Home() {
       setBoard(nextBoard);
 
       const nextWinner = checkWinner(nextBoard);
-      if (nextWinner) {
-        recordResult("loss");
-        return;
-      }
-      if (isDraw(nextBoard)) {
-        recordResult("tie");
-        return;
-      }
+      if (nextWinner) return;
+      if (isDraw(nextBoard)) return;
       setCurrent(HUMAN);
     }, 400);
 
