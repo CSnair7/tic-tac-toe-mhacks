@@ -104,22 +104,141 @@ git push`}
   },
 ];
 
-const breakouts = [
+const breakouts: { label: string; body: ReactNode }[] = [
   {
     label: "Scoreboard",
-    body: "Track wins, losses, and ties across games instead of resetting on every reload.",
+    body: (
+      <>
+        <LetterBody>
+          The storage already exists — <code className={CODE_CHIP}>
+            lib/scoreStore.ts
+          </code>{" "}
+          tracks wins, losses, and ties (in the browser, or in Supabase if
+          you did that setup step), and{" "}
+          <code className={CODE_CHIP}>app/page.tsx</code> already calls{" "}
+          <code className={CODE_CHIP}>recordResult()</code> after every game.
+          This breakout is about reading that data back and putting it on
+          screen, not building storage.
+        </LetterBody>
+        <pre className={CODE_BLOCK}>
+          {`const [stats, setStats] = useState<ScoreStats | null>(null);
+
+async function refreshStats() {
+  const store = await getScoreStore();
+  setStats(await store.getStats());
+}
+
+useEffect(() => {
+  refreshStats();
+}, []);`}
+        </pre>
+        <LetterBody>
+          Call <code className={CODE_CHIP}>refreshStats()</code> again after
+          each <code className={CODE_CHIP}>recordResult(...)</code> call so
+          the board updates immediately, then render{" "}
+          <code className={CODE_CHIP}>
+            {"`${stats.wins}W – ${stats.losses}L – ${stats.ties}T`"}
+          </code>{" "}
+          wherever you&apos;d like it to show, e.g. inside{" "}
+          <code className={CODE_CHIP}>components/Header.tsx</code>.
+        </LetterBody>
+      </>
+    ),
   },
   {
     label: "Difficulty settings",
-    body: "Give the opponent an easy, medium, or hard mode instead of one fixed strategy.",
+    body: (
+      <>
+        <LetterBody>
+          The 2 Player / vs Computer toggle already ships in{" "}
+          <code className={CODE_CHIP}>app/page.tsx</code>, and the computer
+          currently plays every move with{" "}
+          <code className={CODE_CHIP}>randomMove</code> from{" "}
+          <code className={CODE_CHIP}>lib/gameLogic.ts</code> — that&apos;s
+          the whole bot for now, with no difficulty behind it yet. This
+          breakout is about layering tiers on top of that single function.
+        </LetterBody>
+        <pre className={CODE_BLOCK}>
+          {`export function randomMove(board: Board): number {
+  const empty = board
+    .map((cell, i) => (cell === null ? i : null))
+    .filter((i): i is number => i !== null);
+  return empty[Math.floor(Math.random() * empty.length)];
+}`}
+        </pre>
+        <LetterBody>
+          Add a <code className={CODE_CHIP}>difficulty</code> state next to{" "}
+          <code className={CODE_CHIP}>mode</code> in{" "}
+          <code className={CODE_CHIP}>app/page.tsx</code>, and a matching
+          selector alongside the mode buttons. Then write one function per
+          tier in <code className={CODE_CHIP}>lib/gameLogic.ts</code>: keep{" "}
+          <code className={CODE_CHIP}>randomMove</code> as easy, add a
+          function that takes a winning or blocking move when one exists for
+          medium, and a full minimax search over{" "}
+          <code className={CODE_CHIP}>checkWinner</code>/
+          <code className={CODE_CHIP}>isDraw</code> for hard — tic-tac-toe is
+          small enough to search completely. The computer&apos;s move effect
+          only needs one change: call whichever function{" "}
+          <code className={CODE_CHIP}>difficulty</code> currently points at
+          instead of always calling <code className={CODE_CHIP}>randomMove</code>.
+        </LetterBody>
+      </>
+    ),
   },
   {
     label: "Color changes",
-    body: "Swap the theme's palette in globals.css to make the board and pieces your own.",
+    body: (
+      <>
+        <LetterBody>
+          The whole palette lives in one place: the{" "}
+          <code className={CODE_CHIP}>@theme</code> block in{" "}
+          <code className={CODE_CHIP}>app/globals.css</code>.
+        </LetterBody>
+        <pre className={CODE_BLOCK}>
+          {`--color-moss-900: #1d2412;
+--color-parchment: #f5f1de;
+--color-cream: #efe9d4;
+--color-sun: #e8d35a;`}
+        </pre>
+        <LetterBody>
+          Change a hex value there and every{" "}
+          <code className={CODE_CHIP}>bg-moss-900</code>,{" "}
+          <code className={CODE_CHIP}>text-cream</code>, etc. class across
+          the app picks it up automatically — you only need to touch
+          individual components if you want to add a brand-new color name.
+        </LetterBody>
+      </>
+    ),
   },
   {
     label: "Sound effects",
-    body: "Play a sound on move, win, or tie to make the game feel more alive.",
+    body: (
+      <>
+        <LetterBody>
+          There&apos;s no audio yet, so start by dropping a couple of short
+          clips (e.g. <code className={CODE_CHIP}>move.mp3</code>,{" "}
+          <code className={CODE_CHIP}>win.mp3</code>,{" "}
+          <code className={CODE_CHIP}>tie.mp3</code>) into{" "}
+          <code className={CODE_CHIP}>public/sounds/</code>, then play them
+          from a small helper:
+        </LetterBody>
+        <pre className={CODE_BLOCK}>
+          {`function playSound(name: string) {
+  new Audio(\`/sounds/\${name}.mp3\`).play();
+}`}
+        </pre>
+        <LetterBody>
+          Call <code className={CODE_CHIP}>playSound(&quot;move&quot;)</code>{" "}
+          right after <code className={CODE_CHIP}>setBoard(nextBoard)</code>{" "}
+          in <code className={CODE_CHIP}>handleCellClick</code>, and{" "}
+          <code className={CODE_CHIP}>playSound(&quot;win&quot;)</code> /{" "}
+          <code className={CODE_CHIP}>playSound(&quot;tie&quot;)</code>{" "}
+          alongside the existing{" "}
+          <code className={CODE_CHIP}>recordResult(...)</code> calls — the
+          game already knows exactly when each of those happens.
+        </LetterBody>
+      </>
+    ),
   },
 ];
 
@@ -153,24 +272,29 @@ export default function TutorialPage() {
         ))}
 
         <LetterSection tone={steps.length % 2 === 0 ? "well" : "paper"}>
-          <LetterHeading>Workshop breakouts</LetterHeading>
+          <LetterKicker>Workshop breakouts</LetterKicker>
           <LetterBody>
             Once you&apos;re set up, join a small-group session with a mentor
-            to add a new feature to your game:
+            to add one of these to your game. Each one points at exactly
+            where in the code it hooks in:
           </LetterBody>
-          <ul className="mt-1 list-disc space-y-3 pl-5 text-[15px] leading-[1.66] text-ui-ink">
-            {breakouts.map((breakout) => (
-              <li key={breakout.label}>
-                <span className="font-bold text-ui-ink">
-                  {breakout.label}:
-                </span>{" "}
-                {breakout.body}
-              </li>
-            ))}
-          </ul>
         </LetterSection>
 
-        <LetterSection tone={(steps.length + 1) % 2 === 0 ? "well" : "paper"}>
+        {breakouts.map((breakout, index) => (
+          <LetterSection
+            key={breakout.label}
+            tone={(steps.length + 1 + index) % 2 === 0 ? "well" : "paper"}
+          >
+            <LetterHeading>{breakout.label}</LetterHeading>
+            {breakout.body}
+          </LetterSection>
+        ))}
+
+        <LetterSection
+          tone={
+            (steps.length + 1 + breakouts.length) % 2 === 0 ? "well" : "paper"
+          }
+        >
           <div className="flex flex-wrap items-center gap-4">
             <ButtonLink href="/" variant="outline" external={false}>
               Back to the board

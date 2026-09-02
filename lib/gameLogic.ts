@@ -44,3 +44,10 @@ export function applyMove(board: Board, index: number, player: Player): Board {
 export function createEmptyBoard(): Board {
   return Array(9).fill(null);
 }
+
+export function randomMove(board: Board): number {
+  const empty = board
+    .map((cell, i) => (cell === null ? i : null))
+    .filter((i): i is number => i !== null);
+  return empty[Math.floor(Math.random() * empty.length)];
+}
