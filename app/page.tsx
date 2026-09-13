@@ -40,10 +40,18 @@ export default function Home() {
 
     const nextBoard = applyMove(board, index, current);
     setBoard(nextBoard);
+    // TODO: sound — playSound("move") here. See the "Sound effects"
+    // workshop breakout in /tutorial.
 
     const nextWinner = checkWinner(nextBoard);
-    if (nextWinner) return;
-    if (isDraw(nextBoard)) return;
+    if (nextWinner) {
+      // TODO: sound — playSound("win") here.
+      return;
+    }
+    if (isDraw(nextBoard)) {
+      // TODO: sound — playSound("draw") here.
+      return;
+    }
     setCurrent(current === HUMAN ? OPPONENT : HUMAN);
   }
 
@@ -64,10 +72,18 @@ export default function Home() {
       const index = randomMove(board);
       const nextBoard = applyMove(board, index, OPPONENT);
       setBoard(nextBoard);
+      // TODO: sound — playSound("move") here. See the "Sound effects"
+      // workshop breakout in /tutorial.
 
       const nextWinner = checkWinner(nextBoard);
-      if (nextWinner) return;
-      if (isDraw(nextBoard)) return;
+      if (nextWinner) {
+        // TODO: sound — playSound("win") here.
+        return;
+      }
+      if (isDraw(nextBoard)) {
+        // TODO: sound — playSound("draw") here.
+        return;
+      }
       setCurrent(HUMAN);
     }, 400);
 

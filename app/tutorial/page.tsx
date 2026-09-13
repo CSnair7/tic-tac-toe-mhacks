@@ -53,6 +53,130 @@ function Screenshot({
 
 const steps: { label: string; body: ReactNode }[] = [
   {
+    label: "Install Git",
+    body: (
+      <>
+        <LetterBody>
+          You&apos;ll need Git to clone the repo and push your changes. Check
+          whether you already have it:
+        </LetterBody>
+        <pre className={CODE_BLOCK}>{`git --version`}</pre>
+        <LetterBody>
+          If that errors instead of printing a version, install it:
+        </LetterBody>
+        <ul className="mt-3 list-disc space-y-2 pl-5 text-[15px] leading-[1.66] text-ui-ink">
+          <li>
+            <strong>macOS:</strong> run{" "}
+            <code className={CODE_CHIP}>git --version</code> in Terminal — if
+            it&apos;s not already installed, macOS prompts you to install the
+            Xcode Command Line Tools, which include Git.
+          </li>
+          <li>
+            <strong>Windows:</strong> download and run the installer from{" "}
+            <code className={CODE_CHIP}>git-scm.com</code> (defaults are
+            fine — it also adds Git Bash, a terminal you can use for the rest
+            of this tutorial).
+          </li>
+          <li>
+            <strong>Linux:</strong> install it with your package manager,
+            e.g. <code className={CODE_CHIP}>sudo apt install git</code> on
+            Ubuntu/Debian.
+          </li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    label: "Sign in to GitHub",
+    body: (
+      <>
+        <LetterBody>
+          To push code you&apos;ll need Git authenticated with your GitHub
+          account. Pick one:
+        </LetterBody>
+        <LetterBody>
+          <strong>Option A — GitHub CLI:</strong> installs a{" "}
+          <code className={CODE_CHIP}>gh</code> command you&apos;ll also use
+          later to open pull requests.
+        </LetterBody>
+        <pre className={CODE_BLOCK}>
+          {`# macOS
+brew install gh
+
+# Windows
+winget install --id GitHub.cli
+
+# then, on any OS:
+gh auth login`}
+        </pre>
+        <LetterBody>
+          Answer the prompts with{" "}
+          <code className={CODE_CHIP}>GitHub.com</code>,{" "}
+          <code className={CODE_CHIP}>HTTPS</code>, and{" "}
+          <code className={CODE_CHIP}>Login with a web browser</code> — it
+          opens a tab, you approve it, and{" "}
+          <code className={CODE_CHIP}>git push</code> just works from then
+          on.
+        </LetterBody>
+        <LetterBody>
+          <strong>Option B — Cursor:</strong> if you&apos;re coding in
+          Cursor, open the Source Control panel (the branch icon in the left
+          sidebar), and click &quot;Sign in with GitHub&quot; when prompted
+          (or via Cursor&apos;s Accounts settings). It opens the same kind of
+          browser approval and then handles Git authentication for you
+          whenever you push from Cursor.
+        </LetterBody>
+      </>
+    ),
+  },
+  {
+    label: "Install Node.js",
+    body: (
+      <>
+        <LetterBody>
+          This project needs Node.js and npm to run. Check whether you
+          already have them:
+        </LetterBody>
+        <pre className={CODE_BLOCK}>
+          {`node -v
+npm -v`}
+        </pre>
+        <LetterBody>
+          If both print a version (Node 18 or newer is fine) you&apos;re set.
+          If either errors instead, head to{" "}
+          <code className={CODE_CHIP}>nodejs.org</code> and pick one of two
+          options.
+        </LetterBody>
+        <LetterBody>
+          <strong>Option A — CLI, via nvm</strong> (macOS/Linux): installs
+          Node and npm together and makes it easy to switch versions later.
+          The site generates the exact commands for your OS — copy and run
+          them in your terminal:
+        </LetterBody>
+        <Screenshot
+          src="/tutorial/nvm-install.png"
+          width={2188}
+          height={1074}
+          caption="nodejs.org's install picker, set to macOS + nvm + npm"
+        />
+        <LetterBody>
+          <strong>Option B — prebuilt installer:</strong> pick your OS and
+          architecture on the same page and download a one-click installer
+          (<code className={CODE_CHIP}>.msi</code> on Windows,{" "}
+          <code className={CODE_CHIP}>.pkg</code> on macOS). It installs{" "}
+          <code className={CODE_CHIP}>npm</code> alongside{" "}
+          <code className={CODE_CHIP}>node</code>, which the next step uses.
+        </LetterBody>
+        <Screenshot
+          src="/tutorial/windows-installer.png"
+          width={2188}
+          height={248}
+          caption="The prebuilt Windows Installer (.msi) download on nodejs.org"
+        />
+      </>
+    ),
+  },
+  {
     label: "Clone & run",
     body: (
       <Showcase
@@ -183,14 +307,17 @@ git push -u origin feature/your-feature`}
       </>
     ),
   },
+];
+
+const breakouts: { label: string; body: ReactNode }[] = [
   {
-    label: "Supabase setup (for the Scoreboard breakout)",
+    label: "Scoreboard",
     body: (
       <>
         <LetterBody>
-          The game doesn&apos;t track scores yet — that&apos;s the Scoreboard
-          breakout below, and it&apos;s built on Supabase. Set up a project
-          now so it&apos;s ready when you get there:
+          There&apos;s no score tracking yet — this breakout is about
+          building it from scratch on Supabase. Start by setting up a
+          project:
         </LetterBody>
         <ol className="mt-3 list-decimal space-y-2 pl-5 text-[15px] leading-[1.66] text-ui-ink">
           <li>Create a free project at supabase.com.</li>
@@ -209,36 +336,26 @@ create table scores (
           <li>
             In Settings → API, copy your Project URL and{" "}
             <code className={CODE_CHIP}>anon</code> key into{" "}
-            <code className={CODE_CHIP}>.env.local</code>.
+            <code className={CODE_CHIP}>.env.local</code> (copy{" "}
+            <code className={CODE_CHIP}>.env.example</code> first if you
+            haven&apos;t already).
           </li>
           <li>
             Restart <code className={CODE_CHIP}>npm run dev</code> so the new
             env vars are picked up.
           </li>
         </ol>
-      </>
-    ),
-  },
-];
-
-const breakouts: { label: string; body: ReactNode }[] = [
-  {
-    label: "Scoreboard",
-    body: (
-      <>
         <LetterBody>
-          There&apos;s no score tracking yet — this breakout is about
-          building it from scratch on Supabase (see the Supabase setup step
-          above). <code className={CODE_CHIP}>@supabase/supabase-js</code> is
-          already installed, so you just need a client and two queries.
-          Create <code className={CODE_CHIP}>lib/scoreStore.ts</code>:
+          <code className={CODE_CHIP}>@supabase/supabase-js</code> is already
+          installed, so you just need a client and two queries. Create{" "}
+          <code className={CODE_CHIP}>lib/scoreStore.ts</code>:
         </LetterBody>
         <pre className={CODE_BLOCK}>
           {`import { createClient } from "@supabase/supabase-js";
 
 // Connects to your Supabase project using the keys from .env.local.
 // The "!" tells TypeScript these are always set — they will be, once
-// you've followed the Supabase setup step above.
+// you've followed the setup steps above.
 const client = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -376,28 +493,31 @@ export async function recordResult(result: "win" | "loss" | "tie") {
     body: (
       <>
         <LetterBody>
-          There&apos;s no audio yet, so start by dropping a couple of short
-          clips (e.g. <code className={CODE_CHIP}>move.mp3</code>,{" "}
-          <code className={CODE_CHIP}>win.mp3</code>,{" "}
-          <code className={CODE_CHIP}>tie.mp3</code>) into{" "}
-          <code className={CODE_CHIP}>public/sounds/</code>, then play them from
-          a small helper:
+          Three short clips are already sitting in{" "}
+          <code className={CODE_CHIP}>public/sounds/</code> —{" "}
+          <code className={CODE_CHIP}>move.mp3</code>,{" "}
+          <code className={CODE_CHIP}>win.mp3</code>, and{" "}
+          <code className={CODE_CHIP}>draw.mp3</code> — free, no-attribution
+          SFX from Mixkit. Play them from a small helper, e.g.{" "}
+          <code className={CODE_CHIP}>lib/sounds.ts</code>:
         </LetterBody>
         <pre className={CODE_BLOCK}>
-          {`function playSound(name: string) {
-  // e.g. playSound("win") loads and plays "/sounds/win.mp3"
+          {`export function playSound(name: "move" | "win" | "draw") {
   new Audio(\`/sounds/\${name}.mp3\`).play();
 }`}
         </pre>
         <LetterBody>
-          Call <code className={CODE_CHIP}>playSound(&quot;move&quot;)</code>{" "}
-          right after <code className={CODE_CHIP}>setBoard(nextBoard)</code> in{" "}
-          <code className={CODE_CHIP}>handleCellClick</code>, and{" "}
-          <code className={CODE_CHIP}>playSound(&quot;win&quot;)</code> /{" "}
-          <code className={CODE_CHIP}>playSound(&quot;tie&quot;)</code>{" "}
-          alongside the existing{" "}
-          <code className={CODE_CHIP}>recordResult(...)</code> calls — the game
-          already knows exactly when each of those happens.
+          <code className={CODE_CHIP}>app/page.tsx</code> already marks
+          exactly where each call goes with a{" "}
+          <code className={CODE_CHIP}>// TODO: sound</code> comment: call{" "}
+          <code className={CODE_CHIP}>playSound(&quot;move&quot;)</code> right
+          after each <code className={CODE_CHIP}>setBoard(nextBoard)</code> —
+          both in <code className={CODE_CHIP}>handleCellClick</code> and in
+          the computer&apos;s-move effect — then{" "}
+          <code className={CODE_CHIP}>playSound(&quot;win&quot;)</code> where{" "}
+          <code className={CODE_CHIP}>checkWinner</code> finds a winner and{" "}
+          <code className={CODE_CHIP}>playSound(&quot;draw&quot;)</code> where{" "}
+          <code className={CODE_CHIP}>isDraw</code> is true.
         </LetterBody>
       </>
     ),
@@ -442,7 +562,7 @@ export default function TutorialPage() {
             Once you&apos;re set up, join a small-group session with a mentor to
             add one of these to your game. Each one points at exactly where in
             the code it hooks in:
-          </LetterBody>
+            </LetterBody>
         </LetterSection>
 
         {breakouts.map((breakout, index) => (
