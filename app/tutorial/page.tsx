@@ -457,12 +457,46 @@ if (nextWinner) {
           <code className={CODE_CHIP}>await</code>s to work. Do the same at
           the other three spots that already detect a winner or a draw (the
           rest of <code className={CODE_CHIP}>handleCellClick</code>, and
-          both branches of the computer&apos;s move effect), then render{" "}
+          both branches of the computer&apos;s move effect).
+        </LetterBody>
+        <LetterBody>
+          Two more things make it feel finished. First, a returning player
+          already has a row in Supabase, but{" "}
+          <code className={CODE_CHIP}>stats</code> starts at all zeros on
+          every page load — fetch their real numbers once when the
+          component mounts:
+        </LetterBody>
+        <pre className={CODE_BLOCK}>
+          {`useEffect(() => {
+  getStats().then(setStats);
+}, []);`}
+        </pre>
+        <LetterBody>
+          Second, for where to show it: the simplest spot is right in{" "}
+          <code className={CODE_CHIP}>app/page.tsx</code>, next to the
+          status line that&apos;s already there — the{" "}
           <code className={CODE_CHIP}>
-            {"`${stats.wins}W – ${stats.losses}L – ${stats.ties}T`"}
+            {'<div className="pt-6 font-mono text-sm text-moss-300">'}
           </code>{" "}
-          wherever you&apos;d like it to show, e.g. inside{" "}
-          <code className={CODE_CHIP}>components/Header.tsx</code>.
+          that shows whose turn it is. Add a line under it:
+        </LetterBody>
+        <pre className={CODE_BLOCK}>
+          {`<div className="pt-2 font-mono text-xs text-moss-400">
+  {stats.wins}W – {stats.losses}L – {stats.ties}T
+</div>`}
+        </pre>
+        <LetterBody>
+          That keeps everything in one component — no prop-passing
+          needed. If you&apos;d rather it live in{" "}
+          <code className={CODE_CHIP}>components/Header.tsx</code>{" "}
+          instead, that component doesn&apos;t currently take any props,
+          so you&apos;d need to pass stats down yourself:{" "}
+          <code className={CODE_CHIP}>{"<Header stats={stats} />"}</code>{" "}
+          in <code className={CODE_CHIP}>app/page.tsx</code>, plus a{" "}
+          <code className={CODE_CHIP}>
+            {"{ stats }: { stats: { wins: number; losses: number; ties: number } }"}
+          </code>{" "}
+          parameter on <code className={CODE_CHIP}>Header</code> itself.
         </LetterBody>
       </>
     ),
