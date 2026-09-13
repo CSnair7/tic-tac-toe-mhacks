@@ -14,6 +14,7 @@ import {
   type Board as BoardValue,
   type Player,
 } from "@/lib/gameLogic";
+import { playSound } from "@/lib/sounds";
 
 const HUMAN: Player = "X";
 const OPPONENT: Player = "O";
@@ -40,16 +41,15 @@ export default function Home() {
 
     const nextBoard = applyMove(board, index, current);
     setBoard(nextBoard);
-    // TODO: sound — playSound("move") here. See the "Sound effects"
-    // workshop breakout in /tutorial.
+    playSound("move");
 
     const nextWinner = checkWinner(nextBoard);
     if (nextWinner) {
-      // TODO: sound — playSound("win") here.
+      playSound("win");
       return;
     }
     if (isDraw(nextBoard)) {
-      // TODO: sound — playSound("draw") here.
+      playSound("draw");
       return;
     }
     setCurrent(current === HUMAN ? OPPONENT : HUMAN);
@@ -72,16 +72,15 @@ export default function Home() {
       const index = randomMove(board);
       const nextBoard = applyMove(board, index, OPPONENT);
       setBoard(nextBoard);
-      // TODO: sound — playSound("move") here. See the "Sound effects"
-      // workshop breakout in /tutorial.
+      playSound("move");
 
       const nextWinner = checkWinner(nextBoard);
       if (nextWinner) {
-        // TODO: sound — playSound("win") here.
+        playSound("win");
         return;
       }
       if (isDraw(nextBoard)) {
-        // TODO: sound — playSound("draw") here.
+        playSound("draw");
         return;
       }
       setCurrent(HUMAN);
