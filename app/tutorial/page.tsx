@@ -22,6 +22,14 @@ export const metadata: Metadata = {
 const CODE_CHIP = "rounded bg-ui-selected px-1 font-mono text-xs text-ui-ink";
 const CODE_BLOCK =
   "mt-3 overflow-x-auto rounded-lg bg-ui-ink p-3 font-mono text-xs text-ui-surface";
+const LINK = "text-moss underline underline-offset-2 hover:text-olive";
+
+function slugify(label: string) {
+  return label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
 
 function Screenshot({
   src,
@@ -195,6 +203,16 @@ cd <your-repo-name>
 npm install
 npm run dev`}
         </pre>
+        <LetterBody>
+          Grab that URL from the green &quot;Code&quot; button on your new
+          repo:
+        </LetterBody>
+        <Screenshot
+          src="/tutorial/clone-url.png"
+          width={844}
+          height={752}
+          caption="The Code dropdown — HTTPS works with either sign-in option above"
+        />
       </Showcase>
     ),
   },
@@ -402,13 +420,44 @@ export async function recordResult(result: "win" | "loss" | "tie") {
 }`}
         </pre>
         <LetterBody>
-          Then wire it into <code className={CODE_CHIP}>app/page.tsx</code>:
-          call <code className={CODE_CHIP}>recordResult(...)</code> from{" "}
-          <code className={CODE_CHIP}>handleCellClick</code> and the
-          computer&apos;s move effect, right where each one already detects a
-          winner or a draw. Track the stats in state, refresh them with{" "}
-          <code className={CODE_CHIP}>getStats()</code> after each call, and
-          render{" "}
+          Now wire it into <code className={CODE_CHIP}>app/page.tsx</code>{" "}
+          (import <code className={CODE_CHIP}>getStats</code> and{" "}
+          <code className={CODE_CHIP}>recordResult</code> from{" "}
+          <code className={CODE_CHIP}>@/lib/scoreStore</code>). There&apos;s
+          no single &quot;you&quot; in 2-player mode, but the human always
+          plays <code className={CODE_CHIP}>X</code> — that&apos;s{" "}
+          <code className={CODE_CHIP}>HUMAN</code> near the top of the file,
+          with the computer as <code className={CODE_CHIP}>OPPONENT</code> —
+          so record every result from X&apos;s side in both modes: a win
+          when the winner is <code className={CODE_CHIP}>HUMAN</code>, a
+          loss when it&apos;s <code className={CODE_CHIP}>OPPONENT</code>,
+          and a tie on a draw.
+        </LetterBody>
+        <LetterBody>
+          Add a stats state, then call{" "}
+          <code className={CODE_CHIP}>recordResult(...)</code> and{" "}
+          <code className={CODE_CHIP}>getStats()</code> right where{" "}
+          <code className={CODE_CHIP}>handleCellClick</code> already detects
+          a winner — for example:
+        </LetterBody>
+        <pre className={CODE_BLOCK}>
+          {`const [stats, setStats] = useState({ wins: 0, losses: 0, ties: 0 });
+
+// ...inside handleCellClick, where nextWinner is already detected:
+if (nextWinner) {
+  await recordResult(nextWinner === HUMAN ? "win" : "loss");
+  setStats(await getStats());
+  return;
+}`}
+        </pre>
+        <LetterBody>
+          <code className={CODE_CHIP}>handleCellClick</code> will need to
+          become <code className={CODE_CHIP}>async function
+          handleCellClick(...)</code> for those{" "}
+          <code className={CODE_CHIP}>await</code>s to work. Do the same at
+          the other three spots that already detect a winner or a draw (the
+          rest of <code className={CODE_CHIP}>handleCellClick</code>, and
+          both branches of the computer&apos;s move effect), then render{" "}
           <code className={CODE_CHIP}>
             {"`${stats.wins}W – ${stats.losses}L – ${stats.ties}T`"}
           </code>{" "}
@@ -428,63 +477,152 @@ export async function recordResult(result: "win" | "loss" | "tie") {
           currently plays every move with{" "}
           <code className={CODE_CHIP}>randomMove</code> from{" "}
           <code className={CODE_CHIP}>lib/gameLogic.ts</code> — that&apos;s the
-          whole bot for now, with no difficulty behind it yet. This breakout is
-          about layering tiers on top of that single function.
+          whole bot for now, with no difficulty behind it yet. This breakout
+          adds two more tiers, each just a longer list of &quot;try this,
+          else try that&quot; checks — no game-tree search required.
+        </LetterBody>
+        <LetterBody>
+          <strong>Medium</strong> takes a winning move if one exists, else
+          blocks the human&apos;s winning move, else falls back to{" "}
+          <code className={CODE_CHIP}>randomMove</code>. Add this next to{" "}
+          <code className={CODE_CHIP}>randomMove</code> in{" "}
+          <code className={CODE_CHIP}>lib/gameLogic.ts</code>:
         </LetterBody>
         <pre className={CODE_BLOCK}>
-          {`export function randomMove(board: Board): number {
-  // Collect the index of every empty cell on the board...
+          {`function otherPlayer(player: Player): Player {
+  return player === "X" ? "O" : "X";
+}
+
+// Is there a single move that would let "player" win right now?
+function findWinningMove(board: Board, player: Player): number | null {
   const empty = board
     .map((cell, i) => (cell === null ? i : null))
     .filter((i): i is number => i !== null);
 
-  // ...then pick one of those indexes at random.
-  return empty[Math.floor(Math.random() * empty.length)];
+  return (
+    empty.find((i) => checkWinner(applyMove(board, i, player)) === player) ??
+    null
+  );
+}
+
+export function mediumMove(board: Board, me: Player): number {
+  return (
+    findWinningMove(board, me) ??
+    findWinningMove(board, otherPlayer(me)) ??
+    randomMove(board)
+  );
 }`}
         </pre>
         <LetterBody>
-          Add a <code className={CODE_CHIP}>difficulty</code> state next to{" "}
-          <code className={CODE_CHIP}>mode</code> in{" "}
-          <code className={CODE_CHIP}>app/page.tsx</code>, and a matching
-          selector alongside the mode buttons. Then write one function per tier
-          in <code className={CODE_CHIP}>lib/gameLogic.ts</code>: keep{" "}
-          <code className={CODE_CHIP}>randomMove</code> as easy, add a function
-          that takes a winning or blocking move when one exists for medium, and
-          a full minimax search over{" "}
-          <code className={CODE_CHIP}>checkWinner</code>/
-          <code className={CODE_CHIP}>isDraw</code> for hard — tic-tac-toe is
-          small enough to search completely. The computer&apos;s move effect
-          only needs one change: call whichever function{" "}
-          <code className={CODE_CHIP}>difficulty</code> currently points at
-          instead of always calling{" "}
-          <code className={CODE_CHIP}>randomMove</code>.
-        </LetterBody>
-      </>
-    ),
-  },
-  {
-    label: "Color changes",
-    body: (
-      <>
-        <LetterBody>
-          The whole palette lives in one place: the{" "}
-          <code className={CODE_CHIP}>@theme</code> block in{" "}
-          <code className={CODE_CHIP}>app/globals.css</code>.
+          <strong>Hard</strong> plays the classic tic-tac-toe strategy
+          guide — win, block, then avoid ever letting the human set up two
+          threats at once (a &quot;fork&quot;), then fall back to positional
+          preferences. It&apos;s extremely hard to beat and every step is
+          still just a check over <code className={CODE_CHIP}>checkWinner</code>{" "}
+          — no game-tree search — though it isn&apos;t mathematically
+          perfect: there are a couple of rare opening lines where blocking
+          one fork leaves another one open. Finding one is a fun stretch
+          goal.
         </LetterBody>
         <pre className={CODE_BLOCK}>
-          {`/* each variable below becomes a Tailwind color, e.g. bg-moss-900 */
---color-moss-900: #1d2412;
---color-parchment: #f5f1de;
---color-cream: #efe9d4;
---color-sun: #e8d35a;`}
+          {`const CENTER = 4;
+const CORNERS = [0, 2, 6, 8];
+const SIDES = [1, 3, 5, 7];
+const OPPOSITE_CORNER: Record<number, number> = { 0: 8, 2: 6, 6: 2, 8: 0 };
+
+function emptyCells(board: Board): number[] {
+  return board
+    .map((cell, i) => (cell === null ? i : null))
+    .filter((i): i is number => i !== null);
+}
+
+// How many different moves would let "player" win from this board?
+// Two or more means whoever's up next can't block them all — a fork.
+function countWinningMoves(board: Board, player: Player): number {
+  return emptyCells(board).filter(
+    (i) => checkWinner(applyMove(board, i, player)) === player,
+  ).length;
+}
+
+function findForkMove(board: Board, player: Player): number | null {
+  return (
+    emptyCells(board).find(
+      (i) => countWinningMoves(applyMove(board, i, player), player) >= 2,
+    ) ?? null
+  );
+}
+
+// If the opponent holds a corner and its opposite corner is open, that's
+// normally the strongest reply.
+function findOppositeCornerMove(board: Board, opponent: Player): number | null {
+  for (const corner of CORNERS) {
+    const opposite = OPPOSITE_CORNER[corner];
+    if (board[corner] === opponent && board[opposite] === null) {
+      return opposite;
+    }
+  }
+  return null;
+}
+
+function firstEmpty(board: Board, cells: number[]): number | null {
+  return cells.find((i) => board[i] === null) ?? null;
+}
+
+export function hardMove(board: Board, me: Player): number {
+  const opponent = otherPlayer(me);
+
+  return (
+    findWinningMove(board, me) ??
+    findWinningMove(board, opponent) ??
+    findForkMove(board, me) ??
+    findForkMove(board, opponent) ??
+    firstEmpty(board, [CENTER]) ??
+    findOppositeCornerMove(board, opponent) ??
+    firstEmpty(board, CORNERS) ??
+    firstEmpty(board, SIDES) ??
+    randomMove(board)
+  );
+}`}
         </pre>
         <LetterBody>
-          Change a hex value there and every{" "}
-          <code className={CODE_CHIP}>bg-moss-900</code>,{" "}
-          <code className={CODE_CHIP}>text-cream</code>, etc. class across the
-          app picks it up automatically — you only need to touch individual
-          components if you want to add a brand-new color name.
+          Then add a <code className={CODE_CHIP}>difficulty</code> state next
+          to <code className={CODE_CHIP}>mode</code> in{" "}
+          <code className={CODE_CHIP}>app/page.tsx</code>, with buttons for it
+          the same way <code className={CODE_CHIP}>MODES</code> renders the
+          mode buttons:
         </LetterBody>
+        <pre className={CODE_BLOCK}>
+          {`type Difficulty = "easy" | "medium" | "hard";
+
+const DIFFICULTIES: { value: Difficulty; label: string }[] = [
+  { value: "easy", label: "Easy" },
+  { value: "medium", label: "Medium" },
+  { value: "hard", label: "Hard" },
+];
+
+const [difficulty, setDifficulty] = useState<Difficulty>("easy");`}
+        </pre>
+        <LetterBody>
+          The computer&apos;s move only needs one change. In{" "}
+          <code className={CODE_CHIP}>app/page.tsx</code>, find the{" "}
+          <code className={CODE_CHIP}>useEffect</code> that plays the
+          computer&apos;s move — it depends on{" "}
+          <code className={CODE_CHIP}>
+            [computersTurn, gameOver, board]
+          </code>{" "}
+          and runs inside a <code className={CODE_CHIP}>setTimeout</code>{" "}
+          callback. Its very first line is{" "}
+          <code className={CODE_CHIP}>const index = randomMove(board);</code>{" "}
+          — swap just that line for:
+        </LetterBody>
+        <pre className={CODE_BLOCK}>
+          {`const index =
+  difficulty === "hard"
+    ? hardMove(board, OPPONENT)
+    : difficulty === "medium"
+      ? mediumMove(board, OPPONENT)
+      : randomMove(board);`}
+        </pre>
       </>
     ),
   },
@@ -509,7 +647,8 @@ export async function recordResult(result: "win" | "loss" | "tie") {
         <LetterBody>
           <code className={CODE_CHIP}>app/page.tsx</code> already marks
           exactly where each call goes with a{" "}
-          <code className={CODE_CHIP}>// TODO: sound</code> comment: call{" "}
+          <code className={CODE_CHIP}>{"// TODO: sound"}</code> comment:
+          call{" "}
           <code className={CODE_CHIP}>playSound(&quot;move&quot;)</code> right
           after each <code className={CODE_CHIP}>setBoard(nextBoard)</code> —
           both in <code className={CODE_CHIP}>handleCellClick</code> and in
@@ -518,6 +657,51 @@ export async function recordResult(result: "win" | "loss" | "tie") {
           <code className={CODE_CHIP}>checkWinner</code> finds a winner and{" "}
           <code className={CODE_CHIP}>playSound(&quot;draw&quot;)</code> where{" "}
           <code className={CODE_CHIP}>isDraw</code> is true.
+        </LetterBody>
+        <LetterBody>
+          Want different sounds, or more of them (a menu click, background
+          music)? These are all free, no-signup, commercial-use-OK:{" "}
+          <a
+            href="https://mixkit.co/free-sound-effects/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={LINK}
+          >
+            Mixkit
+          </a>
+          ,{" "}
+          <a
+            href="https://pixabay.com/sound-effects/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={LINK}
+          >
+            Pixabay
+          </a>
+          ,{" "}
+          <a
+            href="https://freesound.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={LINK}
+          >
+            Freesound
+          </a>{" "}
+          (huge community library — check each clip&apos;s license, most are{" "}
+          <code className={CODE_CHIP}>CC0</code> but some need attribution),
+          and{" "}
+          <a
+            href="https://kenney.nl/assets?q=audio"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={LINK}
+          >
+            Kenney
+          </a>{" "}
+          (<code className={CODE_CHIP}>CC0</code> packs made specifically for
+          indie games). Drop new files into{" "}
+          <code className={CODE_CHIP}>public/sounds/</code> and reference
+          them the same way as the three above.
         </LetterBody>
       </>
     ),
@@ -534,8 +718,9 @@ export default function TutorialPage() {
           <LetterKicker>Getting Started</LetterKicker>
           <LetterTitle>Make it your own.</LetterTitle>
           <LetterBody>
-            This game is a starter template. Fork the repo, run it locally, and
-            customize it — here&apos;s everything you need to get set up.
+            This game is a starter template. Fork the repo, run it locally,
+            and customize it — here&apos;s everything you need to get set
+            up.
           </LetterBody>
           <div className="mt-5 flex flex-wrap items-center gap-4">
             <ButtonLink href="/" variant="primary" external={false}>
@@ -547,6 +732,7 @@ export default function TutorialPage() {
         {steps.map((step, index) => (
           <LetterSection
             key={step.label}
+            id={slugify(step.label)}
             tone={index % 2 === 0 ? "well" : "paper"}
           >
             <LetterHeading>
@@ -559,15 +745,26 @@ export default function TutorialPage() {
         <LetterSection tone={steps.length % 2 === 0 ? "well" : "paper"}>
           <LetterKicker>Workshop breakouts</LetterKicker>
           <LetterBody>
-            Once you&apos;re set up, join a small-group session with a mentor to
-            add one of these to your game. Each one points at exactly where in
-            the code it hooks in:
-            </LetterBody>
+            Once you&apos;re set up, join a small-group session with a
+            mentor to add one of these to your game. Each one points at
+            exactly where in the code it hooks in — but that only lines up
+            if your copy is current, so pull the latest changes first:
+          </LetterBody>
+          <pre className={CODE_BLOCK}>
+            {`git checkout main
+git pull`}
+          </pre>
+          <LetterBody>
+            If you&apos;re on a branch with changes of your own, commit or
+            stash them first so <code className={CODE_CHIP}>git pull</code>{" "}
+            doesn&apos;t complain.
+          </LetterBody>
         </LetterSection>
 
         {breakouts.map((breakout, index) => (
           <LetterSection
             key={breakout.label}
+            id={slugify(breakout.label)}
             tone={(steps.length + 1 + index) % 2 === 0 ? "well" : "paper"}
           >
             <LetterHeading>{breakout.label}</LetterHeading>

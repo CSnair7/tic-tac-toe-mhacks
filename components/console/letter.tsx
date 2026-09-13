@@ -16,14 +16,18 @@ import type { ReactNode } from "react";
 export function LetterSection({
   children,
   tone = "paper",
+  id,
 }: {
   children: ReactNode;
   /** Sections alternate so the letter reads as bands rather than one slab. */
   tone?: "paper" | "well";
+  /** Anchor target, e.g. for a jump nav. */
+  id?: string;
 }) {
   return (
     <section
-      className={`border-b border-ui-line px-[22px] py-6 last:border-b-0 sm:px-[34px] sm:py-[30px] ${
+      id={id}
+      className={`scroll-mt-6 border-b border-ui-line px-[22px] py-6 last:border-b-0 sm:px-[34px] sm:py-[30px] ${
         tone === "well" ? "bg-ui-well" : "bg-ui-paper"
       }`}
     >
